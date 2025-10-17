@@ -29,7 +29,7 @@ export type Post = {
   publishedAt: string;
   status: 'published' | 'draft';
   views: number;
-  isExclusive?: boolean;
+  isExclusive: boolean;
 };
 
 export type Comment = {

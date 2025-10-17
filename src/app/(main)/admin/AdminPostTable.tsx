@@ -5,15 +5,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Post } from '@/lib/types';
-import { Archive, Star, Trash2 } from 'lucide-react';
+import { Archive, Star, Trash2, Gem } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { togglePostExclusivity } from '@/lib/api';
+import { Switch } from '@/components/ui/switch';
 
-export default function AdminPostTable({ posts }: { posts: Post[] }) {
+export default function AdminPostTable({ posts, onUpdate }: { posts: Post[], onUpdate: () => void }) {
     const { toast } = useToast();
 
     const handleAction = (action: string, postTitle: string) => {
         toast({ title: `${action} post: ${postTitle}`, description: 'This is a mock action.' });
+    };
+
+    const handleToggleExclusive = async (postId: string, currentStatus: boolean) => {
+        const { success } = await togglePostExclusivity(postId);
+        if (success) {
+            toast({ title: `Post is now ${currentStatus ? 'public' : 'exclusive'}` });
+            onUpdate();
+        } else {
+            toast({ title: 'Failed to update post.', variant: 'destructive' });
+        }
     };
 
     return (
@@ -23,6 +35,7 @@ export default function AdminPostTable({ posts }: { posts: Post[] }) {
                     <TableRow>
                         <TableHead>Title</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Exclusive</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -33,6 +46,13 @@ export default function AdminPostTable({ posts }: { posts: Post[] }) {
                             <TableCell className="font-medium">{post.title}</TableCell>
                             <TableCell>
                                 <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>{post.status}</Badge>
+                            </TableCell>
+                             <TableCell>
+                                <Switch
+                                    checked={post.isExclusive}
+                                    onCheckedChange={() => handleToggleExclusive(post.id, post.isExclusive!)}
+                                    aria-label="Toggle exclusive status"
+                                />
                             </TableCell>
                             <TableCell>{post.publishedAt ? format(new Date(post.publishedAt), 'MMM d, yyyy') : '-'}</TableCell>
                             <TableCell className="text-right">
