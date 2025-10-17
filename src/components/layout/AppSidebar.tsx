@@ -25,12 +25,14 @@ import {
   LayoutDashboard,
   Settings,
   Shield,
+  Gem,
 } from 'lucide-react';
 import { ThemeToggle } from '../shared/ThemeToggle';
 
 const navItems: NavItem[] = [
   { href: '/home', title: 'Home', icon: Home },
   { href: '/feed', title: 'Feed', icon: Rss },
+  { href: '/exclusive', title: 'Exclusive', icon: Gem },
   { href: '/postblog', title: 'Post Blog', icon: PenSquare },
   { href: '/about', title: 'About', icon: Users },
   { href: '/contactus', title: 'Contact Us', icon: Mail },

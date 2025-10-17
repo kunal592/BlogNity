@@ -15,10 +15,12 @@ import {
   MessageCircle,
   Share2,
   BookOpen,
+  Gem,
 } from 'lucide-react';
 import { toggleBookmark, toggleLike } from '@/lib/api';
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface BlogCardListProps {
   post: Post;
@@ -69,6 +71,12 @@ export default function BlogCardList({ post, author }: BlogCardListProps) {
             className="object-cover rounded-md"
             data-ai-hint="blog thumbnail"
           />
+           {post.isExclusive && (
+            <Badge className="absolute top-2 right-2" variant="destructive">
+                <Gem className="h-3 w-3 mr-1" />
+                Exclusive
+            </Badge>
+            )}
         </div>
         <div className="flex-grow flex flex-col">
             <div className="flex gap-2 mb-2">
@@ -77,7 +85,7 @@ export default function BlogCardList({ post, author }: BlogCardListProps) {
                 ))}
             </div>
             <h2 className="text-xl font-bold mb-2 leading-tight">
-                <Link href={`/blog/${post.id}`} className="hover:text-primary transition-colors">
+                <Link href={`/blog/${post.id}`} className={cn("hover:text-primary transition-colors", post.isExclusive && !user?.hasPaidAccess && "pointer-events-none")}>
                     {post.title}
                 </Link>
             </h2>

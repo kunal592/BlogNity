@@ -18,6 +18,7 @@ export let mockUsers: User[] = [
     followedBy: ['2', '3'],
     followingUsers: ['2', '3', '4'],
     bookmarkedPosts: ['p2', 'p3'],
+    hasPaidAccess: true,
   },
   {
     id: '2',
@@ -31,6 +32,7 @@ export let mockUsers: User[] = [
     followedBy: ['1'],
     followingUsers: ['1'],
     bookmarkedPosts: ['p1'],
+    hasPaidAccess: true,
   },
   {
     id: '3',
@@ -44,6 +46,7 @@ export let mockUsers: User[] = [
     followedBy: ['1'],
     followingUsers: ['1'],
     bookmarkedPosts: [],
+    hasPaidAccess: false,
   },
   {
     id: '4',
@@ -57,6 +60,7 @@ export let mockUsers: User[] = [
     followedBy: [],
     followingUsers: ['1'],
     bookmarkedPosts: ['p1', 'p4'],
+    hasPaidAccess: false,
   },
 ];
 
@@ -78,6 +82,7 @@ export let mockPosts: Post[] = [
     publishedAt: '2023-10-26T14:00:00Z',
     status: 'published',
     views: 5200,
+    isExclusive: false,
   },
   {
     id: 'p2',
@@ -93,6 +98,7 @@ export let mockPosts: Post[] = [
     publishedAt: '2023-10-25T09:00:00Z',
     status: 'published',
     views: 8900,
+    isExclusive: true,
   },
   {
     id: 'p3',
@@ -108,6 +114,7 @@ export let mockPosts: Post[] = [
     publishedAt: '2023-10-24T18:00:00Z',
     status: 'published',
     views: 12000,
+    isExclusive: true,
   },
   {
     id: 'p4',
@@ -123,6 +130,7 @@ export let mockPosts: Post[] = [
     publishedAt: '2023-10-23T11:00:00Z',
     status: 'published',
     views: 3400,
+    isExclusive: false,
   },
   {
     id: 'p5',
@@ -138,6 +146,7 @@ export let mockPosts: Post[] = [
     publishedAt: '',
     status: 'draft',
     views: 0,
+    isExclusive: false,
   },
 ];
 

@@ -12,6 +12,7 @@ export type User = {
   followedBy: string[]; // user ids
   followingUsers: string[]; // user ids
   bookmarkedPosts: string[]; // post ids
+  hasPaidAccess?: boolean;
 };
 
 export type Post = {
@@ -28,6 +29,7 @@ export type Post = {
   publishedAt: string;
   status: 'published' | 'draft';
   views: number;
+  isExclusive?: boolean;
 };
 
 export type Comment = {

@@ -15,9 +15,11 @@ import {
   MessageCircle,
   Share2,
   BookOpen,
+  Gem,
 } from 'lucide-react';
 import { toggleBookmark, toggleLike } from '@/lib/api';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface BlogCardProps {
   post: Post;
@@ -60,7 +62,7 @@ export default function BlogCard({ post, author }: BlogCardProps) {
 
   return (
     <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <CardHeader className="p-0">
+      <CardHeader className="p-0 relative">
         <Image
           src={post.thumbnailUrl}
           alt={post.title}
@@ -69,6 +71,12 @@ export default function BlogCard({ post, author }: BlogCardProps) {
           className="object-cover w-full h-48"
           data-ai-hint="blog thumbnail"
         />
+        {post.isExclusive && (
+          <Badge className="absolute top-2 right-2" variant="destructive">
+            <Gem className="h-3 w-3 mr-1" />
+            Exclusive
+          </Badge>
+        )}
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <div className="flex gap-2 mb-2">
@@ -77,7 +85,7 @@ export default function BlogCard({ post, author }: BlogCardProps) {
           ))}
         </div>
         <CardTitle className="text-xl mb-2 leading-tight">
-          <Link href={`/blog/${post.id}`} className="hover:text-primary transition-colors">
+          <Link href={`/blog/${post.id}`} className={cn("hover:text-primary transition-colors", post.isExclusive && !user?.hasPaidAccess && "pointer-events-none")}>
             {post.title}
           </Link>
         </CardTitle>
