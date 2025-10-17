@@ -9,15 +9,16 @@ import type { Post, User } from '@/lib/types';
 
 interface BlogListProps {
   posts: (Post & { author?: User })[];
+  listTitle?: string;
 }
 
-export default function BlogList({ posts }: BlogListProps) {
+export default function BlogList({ posts, listTitle = "Public Feed" }: BlogListProps) {
   const [view, setView] = useState<'grid' | 'list'>('grid');
 
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Public Feed</h1>
+        <h1 className="text-3xl font-bold">{listTitle}</h1>
         <div className="flex gap-1">
             <Button
                 variant={view === 'grid' ? 'secondary' : 'ghost'}
