@@ -73,3 +73,12 @@ export type DashboardStat = {
   changeType: 'increase' | 'decrease';
   icon: LucideIcon;
 };
+
+export type ContactMessage = {
+    id: string;
+    name: string;
+    email: string;
+    message: string;
+    status: 'pending' | 'resolved';
+    createdAt: string;
+}

@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { User, Post, Comment, Notification, TeamMember } from './types';
+import { User, Post, Comment, Notification, TeamMember, ContactMessage } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
 const getUserAvatar = (seed: number) => `https://picsum.photos/seed/avatar${seed}/100/100`;
@@ -195,6 +195,34 @@ export const mockTeam: TeamMember[] = [
   { name: 'Diana Prince', role: 'Head of Marketing', avatarUrl: getUserAvatar(4), bio: 'Connecting writers with readers across the globe.' },
   { name: 'Charlie Brown', role: 'Lead Data Scientist', avatarUrl: getUserAvatar(3), bio: 'Uncovering insights to build a smarter platform.' },
 ];
+
+export let mockContactMessages: ContactMessage[] = [
+  {
+    id: uuidv4(),
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    message: 'I am having trouble logging into my account. Can you please help?',
+    status: 'pending',
+    createdAt: '2023-10-29T14:00:00Z',
+  },
+  {
+    id: uuidv4(),
+    name: 'Jane Smith',
+    email: 'jane.smith@example.com',
+    message: 'I would like to suggest a feature for your platform. It would be great to have a way to co-author posts.',
+    status: 'pending',
+    createdAt: '2023-10-29T11:20:00Z',
+  },
+  {
+    id: uuidv4(),
+    name: 'Peter Jones',
+    email: 'peter.jones@example.com',
+    message: 'Just wanted to say I love your platform! Keep up the great work.',
+    status: 'resolved',
+    createdAt: '2023-10-28T18:30:00Z',
+  },
+];
+
 
 export function deleteMockPost(postId: string) {
   const index = mockPosts.findIndex(p => p.id === postId);

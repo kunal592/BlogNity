@@ -1,9 +1,9 @@
 // This file contains mock API functions to simulate backend interactions.
 // In a real application, these would be replaced with actual API calls.
 
-import { mockUsers, mockPosts, mockNotifications, deleteMockPost } from './mockData';
+import { mockUsers, mockPosts, mockNotifications, deleteMockPost, mockContactMessages } from './mockData';
 import { simulateLatency } from './backendSetup';
-import type { User, Post, Notification } from './types';
+import type { User, Post, Notification, ContactMessage } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 // --- USER API ---
@@ -84,9 +84,28 @@ export const getNotifications = async (userId: string): Promise<Notification[]> 
 // --- CONTACT API ---
 export const sendContactMessage = async (formData: { name: string; email: string; message: string }): Promise<{ success: boolean }> => {
   await simulateLatency();
-  console.log('Mock sending message:', formData);
+  const newMessage: ContactMessage = {
+    id: uuidv4(),
+    ...formData,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+  }
+  mockContactMessages.unshift(newMessage);
   return { success: true };
 };
+
+export const getContactMessages = async (): Promise<ContactMessage[]> => {
+    await simulateLatency();
+    return mockContactMessages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export const resolveContactMessage = async (id: string): Promise<{ success: boolean }> => {
+    await simulateLatency();
+    const message = mockContactMessages.find(m => m.id === id);
+    if (!message) return { success: false };
+    message.status = 'resolved';
+    return { success: true };
+}
 
 // --- INTERACTIONS ---
 
