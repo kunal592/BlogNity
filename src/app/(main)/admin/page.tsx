@@ -3,11 +3,45 @@
 import { useEffect, useState } from 'react';
 import { getPosts, getUsers } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, BarChart2 } from 'lucide-react';
+import { Users, FileText, BarChart2, MessageSquareWarning, Settings } from 'lucide-react';
 import AdminUserTable from './AdminUserTable';
 import AdminPostTable from './AdminPostTable';
 import type { User, Post } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+function ReportedCommentsPlaceholder() {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Reported Comments</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="text-center text-muted-foreground py-12">
+                    <MessageSquareWarning className="mx-auto h-12 w-12 mb-4" />
+                    <p>No reported comments at this time.</p>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
+function SiteSettingsPlaceholder() {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Site Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="text-center text-muted-foreground py-12">
+                     <Settings className="mx-auto h-12 w-12 mb-4" />
+                    <p>General site settings will be managed here.</p>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
 
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -35,16 +69,8 @@ export default function AdminPage() {
           <Skeleton className="h-24" />
           <Skeleton className="h-24" />
         </div>
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Manage Users</h2>
-            <Skeleton className="h-64" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Manage Posts</h2>
-            <Skeleton className="h-64" />
-          </div>
-        </div>
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     )
   }
@@ -83,16 +109,26 @@ export default function AdminPage() {
         </Card>
       </div>
 
-      <div className="space-y-8">
-          <div>
-              <h2 className="text-2xl font-semibold mb-4">Manage Users</h2>
-              <AdminUserTable users={users} />
-          </div>
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Manage Posts</h2>
-              <AdminPostTable posts={posts} onUpdate={fetchData} />
-          </div>
-      </div>
+       <Tabs defaultValue="users" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="users">Manage Users</TabsTrigger>
+          <TabsTrigger value="posts">Manage Posts</TabsTrigger>
+          <TabsTrigger value="comments">Reported Comments</TabsTrigger>
+          <TabsTrigger value="settings">Site Settings</TabsTrigger>
+        </TabsList>
+        <TabsContent value="users">
+            <AdminUserTable users={users} />
+        </TabsContent>
+        <TabsContent value="posts">
+            <AdminPostTable posts={posts} onUpdate={fetchData} />
+        </TabsContent>
+        <TabsContent value="comments">
+            <ReportedCommentsPlaceholder />
+        </TabsContent>
+        <TabsContent value="settings">
+            <SiteSettingsPlaceholder />
+        </TabsContent>
+      </Tabs>
 
     </div>
   );
