@@ -2,17 +2,19 @@
 
 import { Button } from '@/components/ui/button';
 import { LayoutGrid, List } from 'lucide-react';
-import { useState } from 'react';
 
-export default function ViewToggle() {
-  const [view, setView] = useState<'grid' | 'list'>('grid');
+interface ViewToggleProps {
+  view: 'grid' | 'list';
+  onViewChange: (view: 'grid' | 'list') => void;
+}
 
+export default function ViewToggle({ view, onViewChange }: ViewToggleProps) {
   return (
     <div className="flex gap-1">
       <Button
         variant={view === 'grid' ? 'secondary' : 'ghost'}
         size="icon"
-        onClick={() => setView('grid')}
+        onClick={() => onViewChange('grid')}
         aria-label="Grid view"
       >
         <LayoutGrid className="h-5 w-5" />
@@ -20,7 +22,7 @@ export default function ViewToggle() {
       <Button
         variant={view === 'list' ? 'secondary' : 'ghost'}
         size="icon"
-        onClick={() => setView('list')}
+        onClick={() => onViewChange('list')}
         aria-label="List view"
       >
         <List className="h-5 w-5" />
