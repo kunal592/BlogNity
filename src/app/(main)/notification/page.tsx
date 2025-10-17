@@ -55,8 +55,8 @@ export default async function NotificationPage() {
                  const notificationLink = notification.postId ? `/blog/${notification.postId}` : `/profile/${notification.fromUserId}`;
 
                 return (
-                  <li key={notification.id} className={cn('p-4 hover:bg-muted/50 transition-colors', !notification.read && 'bg-primary/5')}>
-                     <Link href={notificationLink} className="flex items-start gap-4">
+                  <li key={notification.id} className={cn('hover:bg-muted/50 transition-colors', !notification.read && 'bg-primary/5')}>
+                     <Link href={notificationLink} className="flex items-start gap-4 p-4">
                       <div className="relative">
                         {fromUser && (
                           <Avatar>

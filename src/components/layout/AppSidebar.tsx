@@ -62,7 +62,7 @@ export default function AppSidebar() {
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
+              <Link href={item.href}>
                 <SidebarMenuButton
                   isActive={isActive(item.href)}
                   tooltip={{ children: item.title }}
@@ -78,7 +78,7 @@ export default function AppSidebar() {
         <SidebarMenu>
           {userNavItems.map((item) => (
              <SidebarMenuItem key={item.href}>
-               <Link href={item.href} legacyBehavior passHref>
+               <Link href={item.href}>
                  <SidebarMenuButton
                   isActive={isActive(item.href)}
                   tooltip={{ children: item.title }}
@@ -91,7 +91,7 @@ export default function AppSidebar() {
           ))}
           {user?.role === 'ADMIN' && (
             <SidebarMenuItem>
-              <Link href={adminNavItem.href} legacyBehavior passHref>
+              <Link href={adminNavItem.href}>
                 <SidebarMenuButton
                   isActive={isActive(adminNavItem.href)}
                   tooltip={{ children: adminNavItem.title }}
