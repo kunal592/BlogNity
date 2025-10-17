@@ -11,7 +11,7 @@ export default function AboutPage() {
           Empowering Voices, Connecting Minds
         </h1>
         <p className="max-w-3xl mx-auto text-lg text-muted-foreground">
-          BlogSphere is more than a platform; it's a community dedicated to the art of writing and the joy of discovery. We provide the tools for creators to share their stories and the space for readers to find inspiration.
+          BlogNity is more than a platform; it's a community dedicated to the art of writing and the joy of discovery. We provide the tools for creators to share their stories and the space for readers to find inspiration.
         </p>
       </section>
       
@@ -19,7 +19,7 @@ export default function AboutPage() {
         <div>
           <h2 className="text-3xl font-bold mb-4">Our Story</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Founded in 2023, BlogSphere was born from a simple idea: to create a beautiful, powerful, and intuitive space for writers and readers. We saw a need for a platform that values quality content and elegant design, free from the noise and clutter of traditional social media. Our journey is one of passion for technology and storytelling, culminating in the premium experience you see today.
+            Founded in 2023, BlogNity was born from a simple idea: to create a beautiful, powerful, and intuitive space for writers and readers. We saw a need for a platform that values quality content and elegant design, free from the noise and clutter of traditional social media. Our journey is one of passion for technology and storytelling, culminating in the premium experience you see today.
           </p>
         </div>
         <div className="relative h-80 rounded-lg overflow-hidden">

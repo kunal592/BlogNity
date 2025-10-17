@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
@@ -5,7 +6,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'BlogSphere SaaS',
+  title: 'BlogNity SaaS',
   description: 'The Premium SaaS Blog Platform',
 };
 
