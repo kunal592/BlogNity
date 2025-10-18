@@ -67,6 +67,7 @@ export let mockUsers: User[] = [
 export let mockPosts: Post[] = [
   {
     id: 'p1',
+    slug: 'getting-started-with-nextjs-14',
     title: 'Getting Started with Next.js 14',
     content: '## Introduction\n\nNext.js 14 brings a new set of features that improve developer experience and application performance. In this post, we will explore the key changes and how to get started with a new project.\n\n### App Router\n\nThe App Router is now stable and the recommended way to build Next.js applications. It supports layouts, server components, and streaming UI.',
     excerpt: 'Next.js 14 brings a new set of features that improve developer experience and application performance. Explore the key changes...',
@@ -86,6 +87,7 @@ export let mockPosts: Post[] = [
   },
   {
     id: 'p2',
+    slug: 'the-principles-of-good-ux-design',
     title: 'The Principles of Good UX Design',
     content: '## User-Centricity\n\nGood UX design always puts the user first. Understanding user needs, behaviors, and motivations is crucial. This involves user research, personas, and usability testing.\n\n### Consistency\n\nConsistency in design elements, navigation, and terminology helps users learn and navigate the interface more easily.',
     excerpt: 'Good UX design always puts the user first. Understanding user needs, behaviors, and motivations is crucial for a successful product.',
@@ -102,6 +104,7 @@ export let mockPosts: Post[] = [
   },
   {
     id: 'p3',
+    slug: 'a-deep-dive-into-large-language-models',
     title: 'A Deep Dive into Large Language Models',
     content: '## What are LLMs?\n\nLarge Language Models (LLMs) are a type of artificial intelligence that can understand and generate human-like text. They are trained on vast amounts of text data and can be used for a variety of tasks, such as translation, summarization, and question answering.',
     excerpt: 'Large Language Models (LLMs) are a type of artificial intelligence that can understand and generate human-like text...',
@@ -118,6 +121,7 @@ export let mockPosts: Post[] = [
   },
   {
     id: 'p4',
+    slug: 'content-is-king-a-guide-to-content-strategy',
     title: 'Content is King: A Guide to Content Strategy',
     content: '## Defining Your Audience\n\nThe first step in any content strategy is to define your target audience. Who are you trying to reach? What are their pain points? What kind of content do they consume?',
     excerpt: 'The first step in any content strategy is to define your target audience. Who are you trying to reach? What are their pain points?',
@@ -134,6 +138,7 @@ export let mockPosts: Post[] = [
   },
   {
     id: 'p5',
+    slug: 'my-first-draft-post',
     title: 'My First Draft Post',
     content: 'This is a draft and should not be visible on the public feed.',
     excerpt: 'This is a draft...',
