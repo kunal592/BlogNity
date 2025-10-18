@@ -85,7 +85,7 @@ export default function BlogCard({ post, author }: BlogCardProps) {
           ))}
         </div>
         <CardTitle className="text-xl mb-2 leading-tight">
-          <Link href={`/blog/${post.id}`} className={cn("hover:text-primary transition-colors", post.isExclusive && !user?.hasPaidAccess && "pointer-events-none")}>
+          <Link href={`/blog/${post.slug}`} className={cn("hover:text-primary transition-colors", post.isExclusive && !user?.hasPaidAccess && "pointer-events-none")}>
             {post.title}
           </Link>
         </CardTitle>
