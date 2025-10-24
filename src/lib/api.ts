@@ -1,163 +1,204 @@
+'use client';
+
 import useSWR, { SWRConfiguration } from 'swr';
-import type { User, Post, Notification, ContactMessage } from './types';
+import useSWRInfinite from 'swr/infinite';
+import type { User, Post, Notification, ContactMessage, Bookmark, Tag } from './types';
+import { useAuth } from '@/context/AuthContext';
 
-const API_URL = 'http://localhost:3001'; // Assuming the backend is running on port 3001
+const API_URL = 'http://localhost:3001';
 
-// --- UTILITY FUNCTIONS ---
+// --- GENERIC FETCHER & REQUEST FUNCTIONS ---
 
-const fetcher = async (url: string, token?: string) => {
-    const headers: HeadersInit = {};
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    const res = await fetch(url, { headers });
-    if (!res.ok) {
-        const error = new Error('An error occurred while fetching the data.');
-        error.info = await res.json();
-        error.status = res.status;
-        throw error;
-    }
-    return res.json();
-};
-
-export const postRequest = async (url: string, data: any, token?: string) => {
-    const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    const res = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-        const error = new Error('An error occurred while sending the data.');
-        error.info = await res.json();
-        error.status = res.status;
-        throw error;
-    }
-    return res.json();
-};
-
-const putRequest = async (url: string, data: any, token?: string) => {
-    const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    const res = await fetch(url, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-        const error = new Error('An error occurred while updating the data.');
-        error.info = await res.json();
-        error.status = res.status;
-        throw error;
-    }
-    return res.json();
-};
-
-const deleteRequest = async (url: string, token?: string) => {
-    const headers: HeadersInit = {};
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    const res = await fetch(url, {
-        method: 'DELETE',
-        headers,
-    });
-    if (!res.ok) {
-        const error = new Error('An error occurred while deleting the data.');
-        error.info = await res.json();
-        error.status = res.status;
-        throw error;
-    }
-    return res.json();
-};
-
-// --- USER API ---
-
-export const useUser = (userId: string, token: string, options?: SWRConfiguration) => {
-    const { data, error, isLoading } = useSWR<User>([`${API_URL}/users/${userId}`, token], ([url, token]) => fetcher(url, token), options);
-    return { user: data, error, isLoading };
-};
-
-export const useUsers = (token: string, options?: SWRConfiguration) => {
-    const { data, error, isLoading } = useSWR<User[]>([`${API_URL}/users`, token], ([url, token]) => fetcher(url, token), options);
-    return { users: data, error, isLoading };
+async function fetcher(url: string, token?: string) {
+  const headers: HeadersInit = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    const error: any = new Error('An error occurred while fetching the data.');
+    error.info = await res.json();
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
 }
 
-// --- POST API ---
-
-export const usePosts = (token: string, options?: SWRConfiguration) => {
-    const { data, error, isLoading } = useSWR<Post[]>([`${API_URL}/post`, token], ([url, token]) => fetcher(url, token), options);
-    return { posts: data, error, isLoading };
-};
-
-export const usePost = (postId: string, token: string, options?: SWRConfiguration) => {
-    const { data, error, isLoading } = useSWR<Post>([`${API_URL}/post/${postId}`, token], ([url, token]) => fetcher(url, token), options);
-    return { post: data, error, isLoading };
-};
-
-export const usePostsByAuthor = (authorId: string, token: string, options?: SWRConfiguration) => {
-    const { data, error, isLoading } = useSWR<Post[]>([`${API_URL}/post/author/${authorId}`, token], ([url, token]) => fetcher(url, token), options);
-    return { posts: data, error, isLoading };
-};
-
-export const createPost = async (postData: Omit<Post, 'id' | 'likes' | 'likedBy' | 'comments' | 'publishedAt' | 'views' | 'isExclusive'>, token: string): Promise<Post> => {
-    return await postRequest(`${API_URL}/post`, postData, token);
+async function authenticatedRequest(url: string, method: 'POST' | 'PUT' | 'DELETE', token: string, data?: any) {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+  const res = await fetch(url, {
+    method,
+    headers,
+    body: data ? JSON.stringify(data) : undefined,
+  });
+  if (!res.ok) {
+    const error: any = new Error(`An error occurred during the ${method} request.`);
+    error.info = await res.json();
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
 }
 
-export const updatePost = async (postId: string, updateData: Partial<Post>, token: string): Promise<Post> => {
-    return await putRequest(`${API_URL}/post/${postId}`, updateData, token);
+// --- SERVER-SIDE DATA FETCHING ---
+
+export const getPosts = async (page = 1, limit = 10): Promise<{ posts: Post[], total: number }> => {
+  return fetcher(`${API_URL}/post?page=${page}&limit=${limit}`);
 };
 
-export const deletePost = async (postId: string, token: string): Promise<{ success: boolean }> => {
-    return await deleteRequest(`${API_URL}/post/${postId}`, token);
+export const getPost = async (slugOrId: string): Promise<Post | null> => {
+  try {
+    return await fetcher(`${API_URL}/post/${slugOrId}`);
+  } catch (error: any) {
+    if (error.status === 404) return null;
+    throw error;
+  }
 };
 
-export const getPostSummary = async (postId: string, token: string): Promise<{ summary: string }> => {
-  return await postRequest(`${API_URL}/post/${postId}/summarize`, {}, token);
+// --- SWR HOOKS FOR CLIENT-SIDE DATA FETCHING ---
+
+function useAuthenticatedSWR<T>(key: string | null, options?: SWRConfiguration) {
+  const { token } = useAuth();
+  return useSWR<T>(key ? [key, token] : null, ([url, token]) => fetcher(url, token), options);
+}
+
+function useAuthenticatedSWRInfinite<T extends {id: string}>(getKey: (pageIndex: number, previousPageData: T[] | null) => string | null) {
+  const { token } = useAuth();
+  return useSWRInfinite<T[]>(
+      (pageIndex, previousPageData) => {
+        const key = getKey(pageIndex, previousPageData);
+        return key ? [key, token] : null;
+      },
+      ([url, token]) => fetcher(url, token)
+  );
+}
+
+export const useUsers = (options?: SWRConfiguration) => {
+  const { data, error, isLoading, mutate } = useAuthenticatedSWR<User[]>(`${API_URL}/users`, options);
+  return { data, error, isLoading, mutate };
 };
 
-
-// --- NOTIFICATION API ---
-
-export const useNotifications = (userId: string, token: string, options?: SWRConfiguration) => {
-    const { data, error, isLoading } = useSWR<Notification[]>([`${API_URL}/notification`, token], ([url, token]) => fetcher(url, token), options);
-    return { notifications: data, error, isLoading };
+export const useUser = (id?: string, options?: SWRConfiguration) => {
+  const { data, error, isLoading, mutate } = useAuthenticatedSWR<User>(id ? `${API_URL}/users/${id}` : null, options);
+  return { data, error, isLoading, mutate };
 };
 
-// --- CONTACT API ---
+export const usePostsInfinite = (limit = 5) => {
+    const { data, error, size, setSize, mutate, isLoading } = useAuthenticatedSWRInfinite<Post>(
+        (pageIndex, previousPageData) => {
+            if (previousPageData && !previousPageData.length) return null; // Reached the end
+            return `${API_URL}/post?page=${pageIndex + 1}&limit=${limit}`;
+        }
+    );
+
+    const posts: Post[] = data ? [].concat(...data.map(page => page.posts)) : [];
+    const isLoadingMore = isLoading || (size > 0 && data && typeof data[size - 1] === 'undefined');
+    const isReachingEnd = data && (!data[data.length-1]?.posts.length || data[data.length -1].posts.length < limit);
+
+    return { posts, error, isLoading: isLoading, isLoadingMore, isReachingEnd, size, setSize, mutate };
+};
+
+export const usePostsByAuthor = (authorId?: string, options?: SWRConfiguration) => {
+  const { data, error, isLoading, mutate } = useAuthenticatedSWR<Post[]>(authorId ? `${API_URL}/post/author/${authorId}` : null, options);
+  return { data, error, isLoading, mutate };
+};
+
+export const useSearchPosts = (query?: string, options?: SWRConfiguration) => {
+  const { data, error, isLoading, mutate } = useAuthenticatedSWR<Post[]>(query ? `${API_URL}/post/search?q=${encodeURIComponent(query)}` : null, options);
+  return { data, error, isLoading, mutate };
+};
+
+export const useBookmarkedPosts = (userId?: string, options?: SWRConfiguration) => {
+    const { data, error, isLoading, mutate } = useAuthenticatedSWR<Bookmark[]>(userId ? `${API_URL}/users/${userId}/bookmarks` : null, options);
+    return { data, error, isLoading, mutate };
+}
+
+export const useNotifications = (userId?: string, options?: SWRConfiguration) => {
+  const { data, error, isLoading, mutate } = useAuthenticatedSWR<Notification[]>(userId ? `${API_URL}/notification` : null, options);
+  return { data, error, isLoading, mutate };
+};
+
+export const useContactMessages = (options?: SWRConfiguration) => {
+  const { data, error, isLoading, mutate } = useAuthenticatedSWR<ContactMessage[]>(`${API_URL}/contact`, options);
+  return { data, error, isLoading, mutate };
+}
+
+// --- MUTATION HOOKS (CREATE, UPDATE, DELETE) ---
+
+export function useCreatePost() {
+    const { token } = useAuth();
+    const trigger = async (postData: Partial<Post> & { authorId: string, title: string, content: string }, id?: string): Promise<Post> => {
+        if (!token) throw new Error("User is not authenticated.");
+        const url = id ? `${API_URL}/post/${id}` : `${API_URL}/post`;
+        const method = id ? 'PUT' : 'POST';
+        return authenticatedRequest(url, method, token, postData);
+    };
+    return { trigger };
+}
+
+export function useUpdatePost() {
+    const { token } = useAuth();
+    const trigger = async (id: string, updateData: Partial<Post>): Promise<Post> => {
+        if (!token) throw new Error("User is not authenticated.");
+        return authenticatedRequest(`${API_URL}/post/${id}`, 'PUT', token, updateData);
+    };
+    return { trigger };
+}
+
+export function useDeletePost() {
+    const { token } = useAuth();
+    const trigger = async (id: string): Promise<{ success: boolean }> => {
+        if (!token) throw new Error("User is not authenticated.");
+        return authenticatedRequest(`${API_URL}/post/${id}`, 'DELETE', token);
+    };
+    return { trigger };
+}
+
+export function useUpdateContactMessage() {
+    const { token } = useAuth();
+    const trigger = async (id: string, updateData: Partial<ContactMessage>): Promise<ContactMessage> => {
+        if (!token) throw new Error("User is not authenticated.");
+        return authenticatedRequest(`${API_URL}/contact/${id}`, 'PUT', token, updateData);
+    };
+    return { trigger };
+}
+
+export function useUpdateNotification() {
+    const { token } = useAuth();
+    const trigger = async (data: { id: string; isRead: boolean }): Promise<Notification> => {
+        if (!token) throw new Error("User is not authenticated.");
+        return authenticatedRequest(`${API_URL}/notification/${data.id}`, 'PUT', token, { isRead: data.isRead });
+    };
+    return { trigger };
+}
 
 export const sendContactMessage = async (formData: { name: string; email: string; message: string }): Promise<{ success: boolean }> => {
-  return await postRequest(`${API_URL}/contact`, formData);
+  const res = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+    });
+    if (!res.ok) throw new Error('Failed to send message');
+    return res.json();
 };
 
-export const useContactMessages = (token: string, options?: SWRConfiguration) => {
-    const { data, error, isLoading } = useSWR<ContactMessage[]>([`${API_URL}/contact`, token], ([url, token]) => fetcher(url, token), options);
-    return { messages: data, error, isLoading };
-}
-
-export const resolveContactMessage = async (id: string, token: string): Promise<{ success: boolean }> => {
-    return await putRequest(`${API_URL}/contact/${id}/resolve`, {}, token);
-}
-
-// --- INTERACTIONS ---
-
-export const toggleLike = async (postId: string, userId: string, token: string): Promise<Post> => {
-    return await postRequest(`${API_URL}/post/${postId}/like`, { userId }, token);
+export const getPostSummary = async (postId: string): Promise<{ summary: string }> => {
+  const { token } = useAuth();
+  if (!token) throw new Error("User is not authenticated.");
+  return authenticatedRequest(`${API_URL}/post/${postId}/summarize`, 'POST', token);
 };
 
-export const toggleBookmark = async (postId: string, userId: string, token: string): Promise<User> => {
-    return await postRequest(`${API_URL}/users/${userId}/bookmark`, { postId }, token);
+export const toggleLike = async (postId: string, userId: string): Promise<Post> => {
+    const { token } = useAuth();
+    if (!token) throw new Error("User is not authenticated.");
+    return authenticatedRequest(`${API__URL}/post/${postId}/like`, 'POST', token, { userId });
 };
 
-export const togglePostExclusivity = async (postId: string, token: string): Promise<{ success: boolean }> => {
-    return await postRequest(`${API_URL}/post/${postId}/exclusive`, {}, token);
-}
+export const toggleBookmark = async (postId: string, userId: string): Promise<User> => {
+    const { token } = useAuth();
+    if (!token) throw new Error("User is not authenticated.");
+    return authenticatedRequest(`${API_URL}/users/${userId}/bookmark`, 'POST', token, { postId });
+};
