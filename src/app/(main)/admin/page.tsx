@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getPosts, getUsers, getContactMessages } from '@/lib/api';
+import { usePosts, useUsers, useContactMessages } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, BarChart2, MessageSquareWarning, Settings, MailQuestion } from 'lucide-react';
 import AdminUserTable from './AdminUserTable';
@@ -45,24 +45,17 @@ function SiteSettingsPlaceholder() {
 
 
 export default function AdminPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [queries, setQueries] = useState<ContactMessage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: users, isLoading: usersLoading } = useUsers();
+  const { data: posts, isLoading: postsLoading, mutate: mutatePosts } = usePosts();
+  const { data: queries, isLoading: queriesLoading, mutate: mutateQueries } = useContactMessages();
   const totalReports = 12; // Mock data
 
-  const fetchData = async () => {
-    setLoading(true);
-    const [userResponse, postResponse, queryResponse] = await Promise.all([getUsers(), getPosts(), getContactMessages()]);
-    setUsers(userResponse);
-    setPosts(postResponse);
-    setQueries(queryResponse);
-    setLoading(false);
-  }
+  const loading = usersLoading || postsLoading || queriesLoading;
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const handleUpdate = () => {
+    mutatePosts();
+    mutateQueries();
+  }
 
   if (loading) {
     return (
@@ -91,7 +84,7 @@ export default function AdminPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{users.length}</div>
+            <div className="text-2xl font-bold">{users?.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -100,7 +93,7 @@ export default function AdminPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{posts.length}</div>
+            <div className="text-2xl font-bold">{posts?.length}</div>
           </CardContent>
         </Card>
          <Card>
@@ -109,7 +102,7 @@ export default function AdminPage() {
             <MailQuestion className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{queries.filter(q => q.status === 'pending').length}</div>
+            <div className="text-2xl font-bold">{queries?.filter(q => q.status === 'pending').length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -132,13 +125,13 @@ export default function AdminPage() {
           <TabsTrigger value="settings">Site Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="users">
-            <AdminUserTable users={users} />
+            <AdminUserTable users={users || []} />
         </TabsContent>
         <TabsContent value="posts">
-            <AdminPostTable posts={posts} onUpdate={fetchData} />
+            <AdminPostTable posts={posts || []} onUpdate={handleUpdate} />
         </TabsContent>
         <TabsContent value="queries">
-            <ResolveQueriesTable queries={queries} onUpdate={fetchData} />
+            <ResolveQueriesTable queries={queries || []} onUpdate={handleUpdate} />
         </TabsContent>
         <TabsContent value="comments">
             <ReportedCommentsPlaceholder />

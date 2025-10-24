@@ -1,28 +1,46 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import MDEditor from '@uiw/react-md-editor';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/context/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
-import { createPost } from '@/lib/api';
+import { createPost, getPost } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { aiSEOBlog } from '@/ai/flows/ai-seo-blog';
 import { Loader2, Wand2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import type { Post } from '@/lib/types';
 
 export default function Editor() {
   const { theme } = useTheme();
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const postId = searchParams.get('id');
+
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('**Hello world!!!**');
   const [tags, setTags] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!postId);
+
+  useEffect(() => {
+    if (postId) {
+      getPost(postId).then(post => {
+        if (post) {
+            setTitle(post.title);
+            setContent(post.content);
+            setTags(post.tags.map(t => t.name).join(', '));
+        }
+        setIsLoading(false);
+      });
+    }
+  }, [postId]);
 
   const handleSave = async (status: 'draft' | 'published') => {
     if (!user) {
@@ -35,15 +53,21 @@ export default function Editor() {
     }
     setIsSubmitting(true);
     try {
-      await createPost({
+      const postData: Partial<Post> & { authorId: string, title: string, content: string } = {
         title,
         content,
         authorId: user.id,
         status,
-        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        tags: tags.split(',').map(t => ({ name: t.trim() })).filter(Boolean),
         excerpt: content.substring(0, 150) + '...',
-        thumbnailUrl: `https://picsum.photos/seed/${Date.now()}/600/400`,
-      });
+      };
+
+      if (!postId) {
+          postData.thumbnailUrl = `https://picsum.photos/seed/${Date.now()}/600/400`;
+      }
+      
+      await createPost(postData, postId || undefined);
+
       toast({ title: `Post ${status === 'draft' ? 'saved as draft' : 'published'}!` });
       router.push('/dashboard');
     } catch (error) {
@@ -62,13 +86,15 @@ export default function Editor() {
       toast({ title: 'AI SEO Optimization Applied!', description: `Meta Description: ${result.metaDescription}` });
     } catch (error) {
       console.error(error);
-      toast({ title: 'AI Optimization failed.', description: 'Using mock data instead.', variant: 'destructive' });
-      setTitle(title + ' (SEO Optimized)');
-      setContent(content + '\n\n*This content has been optimized for SEO by our AI.*');
+      toast({ title: 'AI Optimization failed.', variant: 'destructive' });
     } finally {
       setIsOptimizing(false);
     }
   };
+
+  if (isLoading) {
+      return <Loader2 className="mx-auto my-12 h-8 w-8 animate-spin" />;
+  }
 
   return (
     <div className="space-y-6">
@@ -113,7 +139,7 @@ export default function Editor() {
           disabled={isSubmitting}
         >
           {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Publish
+          {postId ? 'Update' : 'Publish'}
         </Button>
       </div>
     </div>

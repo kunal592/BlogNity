@@ -2,53 +2,65 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import type { User } from '@/lib/types';
-import { mockUsers } from '@/lib/mockData';
+import { postRequest } from '@/lib/api';
+import jwt_decode from 'jwt-decode';
 
 interface AuthContextType {
   user: User | null;
-  login: (userId: string) => void;
+  login: (credentials: any) => Promise<void>;
   logout: () => void;
-  // This function would be in a real app to update user data after edits
   refetchUser: () => void;
+  token: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// For this frontend-only demo, we'll just pick the first user as the logged-in user.
-const MOCK_LOGGED_IN_USER_ID = '1';
-// You can switch this to MOCK_ADMIN_USER_ID to test admin features:
-const MOCK_ADMIN_USER_ID = mockUsers.find(u => u.role === 'ADMIN')?.id || '2';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  const login = (userId: string) => {
-    const userToLogin = mockUsers.find(u => u.id === userId);
-    setUser(userToLogin || null);
+  useEffect(() => {
+    const storedToken = localStorage.getItem('jwt');
+    if (storedToken) {
+      const decoded: any = jwt_decode(storedToken);
+      setUser(decoded.user);
+      setToken(storedToken);
+    }
+  }, []);
+
+  const login = async (credentials: any) => {
+    try {
+      const { accessToken } = await postRequest('http://localhost:3001/auth/login', credentials);
+      const decoded: any = jwt_decode(accessToken);
+      setUser(decoded.user);
+      setToken(accessToken);
+      localStorage.setItem('jwt', accessToken);
+    } catch (error) {
+      console.error('Login failed', error);
+      // Handle login error (e.g., show a toast notification)
+    }
   };
   
-  // This is a mock function to simulate refetching user data
-  const refetchUser = () => {
-    if (user) {
-      const updatedUser = mockUsers.find(u => u.id === user.id);
-      setUser(updatedUser || null);
+  const refetchUser = async () => {
+    // In a real app, you might want to refetch the user from the backend
+    // For now, we'll just refetch from the decoded token
+    const storedToken = localStorage.getItem('jwt');
+    if (storedToken) {
+      const decoded: any = jwt_decode(storedToken);
+      setUser(decoded.user);
     }
   };
 
-  useEffect(() => {
-    // Auto-login the default user for demo purposes.
-    // Change MOCK_LOGGED_IN_USER_ID to MOCK_ADMIN_USER_ID to log in as admin.
-    login(MOCK_LOGGED_IN_USER_ID);
-  }, []);
-
   const logout = () => {
     setUser(null);
-    // In a real app, you would redirect to a login page
-    console.log("User logged out.");
+    setToken(null);
+    localStorage.removeItem('jwt');
+    // Redirect to login page or home page
+    window.location.href = '/';
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, refetchUser }}>
+    <AuthContext.Provider value={{ user, login, logout, refetchUser, token }}>
       {children}
     </AuthContext.Provider>
   );

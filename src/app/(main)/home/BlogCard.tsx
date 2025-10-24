@@ -17,7 +17,7 @@ import {
   BookOpen,
   Gem,
 } from 'lucide-react';
-import { toggleBookmark, toggleLike } from '@/lib/api';
+import { toggleBookmark, toggleLike, getPostSummary } from '@/lib/api';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -27,37 +27,48 @@ interface BlogCardProps {
 }
 
 export default function BlogCard({ post, author }: BlogCardProps) {
-  const { user, refetchUser } = useAuth();
+  const { user, refetchUser, token } = useAuth();
   const { toast } = useToast();
   const [isLiked, setIsLiked] = useState(user ? post.likedBy.includes(user.id) : false);
   const [likes, setLikes] = useState(post.likes);
   const [isBookmarked, setIsBookmarked] = useState(user ? user.bookmarkedPosts.includes(post.id) : false);
 
   const handleLike = async () => {
-    if (!user) return toast({ title: 'Please log in to like posts.', variant: 'destructive' });
+    if (!user || !token) return toast({ title: 'Please log in to like posts.', variant: 'destructive' });
     
     setIsLiked(!isLiked);
     setLikes(prev => isLiked ? prev - 1 : prev + 1);
     
-    await toggleLike(post.id, user.id);
+    await toggleLike(post.id, user.id, token);
     toast({ title: isLiked ? 'Post unliked' : 'Post liked!' });
   };
 
   const handleBookmark = async () => {
-    if (!user) return toast({ title: 'Please log in to bookmark posts.', variant: 'destructive' });
+    if (!user || !token) return toast({ title: 'Please log in to bookmark posts.', variant: 'destructive' });
 
     setIsBookmarked(!isBookmarked);
-    await toggleBookmark(post.id, user.id);
+    await toggleBookmark(post.id, user.id, token);
     refetchUser(); // update user context
     toast({ title: isBookmarked ? 'Bookmark removed' : 'Post bookmarked!' });
   };
   
-  const handleSummarize = () => {
-    // In a real app, this would trigger the AI summary flow.
-    toast({
-      title: 'AI Summary',
-      description: 'This is a mock AI summary of the blog post. It provides a concise overview of the main points.',
-    });
+  const handleSummarize = async () => {
+    if (!token) return toast({ title: 'Please log in to summarize posts.', variant: 'destructive' });
+
+    try {
+      const { summary } = await getPostSummary(post.id, token);
+      toast({
+        title: 'AI Summary',
+        description: summary,
+      });
+    } catch (error) {
+      console.error('Error summarizing post', error);
+      toast({
+        title: 'Error',
+        description: 'Could not summarize the post at this time.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (

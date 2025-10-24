@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { ContactMessage } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { resolveContactMessage } from '@/lib/api';
+import { updateContactMessage } from '@/lib/api';
 import { CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -19,7 +19,7 @@ export default function ResolveQueriesTable({ queries, onUpdate }: ResolveQuerie
     const { toast } = useToast();
 
     const handleResolve = async (id: string) => {
-        const { success } = await resolveContactMessage(id);
+        const { success } = await updateContactMessage(id, { status: 'resolved' });
         if (success) {
             toast({ title: 'Query marked as resolved.' });
             onUpdate();
