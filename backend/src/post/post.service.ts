@@ -14,12 +14,12 @@ export class PostService {
       title,
       slug: slugify(title, { lower: true, strict: true }),
       ...postData,
-      author: { connect: { id: String(authorId) } }
+      author: { connect: { id: authorId } }
      } });
   }
 
   findAll() {
-    return this.prisma.post.findMany();
+    return this.prisma.post.findMany({ include: { author: true } });
   }
 
   findOne(id: string) {
@@ -30,7 +30,7 @@ export class PostService {
     const { authorId, title, ...postData } = updatePostDto;
     let data: any = { ...postData };
     if (authorId) {
-      data.author = { connect: { id: String(authorId) } };
+      data.author = { connect: { id: authorId } };
     }
     if (title) {
       data.title = title;

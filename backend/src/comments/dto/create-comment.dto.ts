@@ -6,8 +6,10 @@ export class CreateCommentDto {
   content: string;
 
   @IsString()
+  @IsNotEmpty()
   authorId: string;
 
   @IsString()
+  @IsNotEmpty()
   postId: string;
 }

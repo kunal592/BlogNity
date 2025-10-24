@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { CommentsModule } from './comments/comments.module';
 import { InteractionModule } from './interaction/interaction.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { InteractionModule } from './interaction/interaction.module';
     PostModule,
     PrismaModule,
     CommentsModule,
-    InteractionModule
+    InteractionModule,
+    UsersModule
   ],
   controllers: [AppController],
   providers: [AppService],

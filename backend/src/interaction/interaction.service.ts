@@ -9,13 +9,14 @@ export class InteractionService {
 
   create(createInteractionDto: CreateInteractionDto) {
     const { userId, postId, ...interactionData } = createInteractionDto;
-    return this.prisma.like.create({ 
+    return this.prisma.like.create({
       data: {
         ...interactionData,
+        target: 'POST', // Add the target field here
         user: { connect: { id: userId } },
-        post: { connect: { id: postId } }
-      }
-     });
+        post: { connect: { id: postId } },
+      },
+    });
   }
 
   findAll() {
@@ -33,7 +34,7 @@ export class InteractionService {
       data.user = { connect: { id: userId } };
     }
     if (postId) {
-        data.post = { connect: { id: postId } };
+      data.post = { connect: { id: postId } };
     }
 
     return this.prisma.like.update({
