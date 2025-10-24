@@ -98,7 +98,7 @@ model Post {
   readingTime      Int? // Estimated reading time in minutes
   publishedAt      DateTime?
   createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  updatedAt        DateTime         @updatedAt
 
   // Relations
   author           User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -151,6 +151,7 @@ model Comment {
   content   String
   isEdited  Boolean   @default(false)
   isDeleted Boolean   @default(false)
+  reported  Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 

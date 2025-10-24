@@ -7,6 +7,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { CommentsModule } from './comments/comments.module';
 import { LikesModule } from './likes/likes.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
+import { NotificationModule } from './notification/notification.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -15,7 +17,9 @@ import { BookmarksModule } from './bookmarks/bookmarks.module';
     PrismaModule,
     CommentsModule,
     LikesModule,
-    BookmarksModule
+    BookmarksModule,
+    NotificationModule,
+    AdminModule
   ],
   controllers: [AppController],
   providers: [AppService],
