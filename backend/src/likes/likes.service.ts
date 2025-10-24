@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { CreateInteractionDto } from './dto/create-interaction.dto';
-import { UpdateInteractionDto } from './dto/update-interaction.dto';
+import { CreateLikeDto } from './dto/create-like.dto';
+import { UpdateLikeDto } from './dto/update-like.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class InteractionService {
+export class LikesService {
   constructor(private prisma: PrismaService) {}
 
-  create(createInteractionDto: CreateInteractionDto) {
-    const { userId, postId, ...interactionData } = createInteractionDto;
+  create(createLikeDto: CreateLikeDto) {
+    const { userId, postId, ...likeData } = createLikeDto;
     return this.prisma.like.create({ 
       data: {
-        ...interactionData,
+        ...likeData,
         user: { connect: { id: userId } },
         post: { connect: { id: postId } }
       }
@@ -26,9 +26,9 @@ export class InteractionService {
     return this.prisma.like.findUnique({ where: { id } });
   }
 
-  update(id: string, updateInteractionDto: UpdateInteractionDto) {
-    const { userId, postId, ...interactionData } = updateInteractionDto;
-    let data: any = { ...interactionData };
+  update(id: string, updateLikeDto: UpdateLikeDto) {
+    const { userId, postId, ...likeData } = updateLikeDto;
+    let data: any = { ...likeData };
     if (userId) {
       data.user = { connect: { id: userId } };
     }
