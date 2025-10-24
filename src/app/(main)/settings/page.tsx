@@ -23,6 +23,14 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
+  const handleThemeChange = (value: 'light' | 'dark') => {
+    setTheme(value);
+    toast({
+      title: 'Theme Changed',
+      description: `Switched to ${value} mode.`,
+    });
+  };
+
   const handleExportData = () => {
     toast({
       title: 'Exporting Data',
@@ -50,7 +58,7 @@ export default function SettingsPage() {
         <CardContent>
           <div className="grid gap-4">
             <Label>Theme</Label>
-            <RadioGroup value={theme} onValueChange={(value: 'light' | 'dark') => setTheme(value)}>
+            <RadioGroup value={theme} onValueChange={handleThemeChange}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="light" id="light" />
                 <Label htmlFor="light">Light (Purple)</Label>
