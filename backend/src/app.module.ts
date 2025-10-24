@@ -5,7 +5,8 @@ import { PostModule } from './post/post.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { CommentsModule } from './comments/comments.module';
-import { InteractionModule } from './interaction/interaction.module';
+import { LikesModule } from './likes/likes.module';
+import { BookmarksModule } from './bookmarks/bookmarks.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { InteractionModule } from './interaction/interaction.module';
     PostModule,
     PrismaModule,
     CommentsModule,
-    InteractionModule
+    LikesModule,
+    BookmarksModule
   ],
   controllers: [AppController],
   providers: [AppService],
