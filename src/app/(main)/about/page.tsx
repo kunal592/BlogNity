@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockTeam } from '@/lib/mockData';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function AboutPage() {
@@ -52,25 +51,6 @@ export default function AboutPage() {
             <p className="text-muted-foreground">To be the leading platform for thoughtful content and meaningful connections, fostering a world where every story has a chance to make an impact.</p>
           </CardContent>
         </Card>
-      </section>
-
-      <section>
-        <h2 className="text-3xl font-bold text-center mb-8">Meet the Team</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {mockTeam.map((member) => (
-            <Card key={member.name} className="text-center">
-              <CardContent className="p-6">
-                <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarImage src={member.avatarUrl} alt={member.name} />
-                  <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <h3 className="text-lg font-semibold">{member.name}</h3>
-                <p className="text-sm text-primary">{member.role}</p>
-                <p className="text-xs text-muted-foreground mt-2">{member.bio}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </section>
     </div>
   );

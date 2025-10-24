@@ -13,16 +13,16 @@ export class AdminService {
     return this.prisma.post.findMany();
   }
 
-  listReportedComments() {
-    return this.prisma.comment.findMany({ where: { reported: true } });
-  }
+  // listReportedComments() {
+  //   return this.prisma.comment.findMany({ where: { reported: true } });
+  // }
 
-  resolveReportedComment(id: string) {
-    return this.prisma.comment.update({
-      where: { id },
-      data: { reported: false },
-    });
-  }
+  // resolveReportedComment(id: string) {
+  //   return this.prisma.comment.update({
+  //     where: { id },
+  //     data: { reported: false },
+  //   });
+  // }
 
   async manageContent(id: string) {
     const post = await this.prisma.post.findUnique({ where: { id } });

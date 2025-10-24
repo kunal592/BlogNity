@@ -15,15 +15,15 @@ export class AdminController {
     return this.adminService.listPosts();
   }
 
-  @Get('reported-comments')
-  listReportedComments() {
-    return this.adminService.listReportedComments();
-  }
+  // @Get('reported-comments')
+  // listReportedComments() {
+  //   return this.adminService.listReportedComments();
+  // }
 
-  @Patch('reported-comments/:id/resolve')
-  resolveReportedComment(@Param('id') id: string) {
-    return this.adminService.resolveReportedComment(id);
-  }
+  // @Patch('reported-comments/:id/resolve')
+  // resolveReportedComment(@Param('id') id: string) {
+  //   return this.adminService.resolveReportedComment(id);
+  // }
 
   @Delete('content/:id')
   manageContent(@Param('id') id: string) {

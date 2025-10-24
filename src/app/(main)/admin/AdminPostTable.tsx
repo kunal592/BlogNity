@@ -8,7 +8,7 @@ import type { Post } from '@/lib/types';
 import { Archive, Star, Trash2, Gem } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { togglePostExclusivity } from '@/lib/api';
+import { updatePost } from '@/lib/api';
 import { Switch } from '@/components/ui/switch';
 
 export default function AdminPostTable({ posts, onUpdate }: { posts: Post[], onUpdate: () => void }) {
@@ -18,10 +18,11 @@ export default function AdminPostTable({ posts, onUpdate }: { posts: Post[], onU
         toast({ title: `${action} post: ${postTitle}`, description: 'This is a mock action.' });
     };
 
-    const handleToggleExclusive = async (postId: string, currentStatus: boolean) => {
-        const { success } = await togglePostExclusivity(postId);
+    const handleToggleExclusive = async (post: Post) => {
+        const newVisibility = post.visibility === 'premium' ? 'public' : 'premium';
+        const { success } = await updatePost(post.id, { visibility: newVisibility });
         if (success) {
-            toast({ title: `Post is now ${currentStatus ? 'public' : 'exclusive'}` });
+            toast({ title: `Post is now ${newVisibility}` });
             onUpdate();
         } else {
             toast({ title: 'Failed to update post.', variant: 'destructive' });
@@ -49,12 +50,12 @@ export default function AdminPostTable({ posts, onUpdate }: { posts: Post[], onU
                             </TableCell>
                              <TableCell>
                                 <Switch
-                                    checked={post.isExclusive}
-                                    onCheckedChange={() => handleToggleExclusive(post.id, post.isExclusive!)}
+                                    checked={post.visibility === 'premium'}
+                                    onCheckedChange={() => handleToggleExclusive(post)}
                                     aria-label="Toggle exclusive status"
                                 />
                             </TableCell>
-                            <TableCell>{post.publishedAt ? format(new Date(post.publishedAt), 'MMM d, yyyy') : '-'}</TableCell>
+                            <TableCell>{post.createdAt ? format(new Date(post.createdAt), 'MMM d, yyyy') : '-'}</TableCell>
                             <TableCell className="text-right">
                                 <Button variant="ghost" size="icon" onClick={() => handleAction('Feature', post.title)}><Star className="h-4 w-4" /></Button>
                                 <Button variant="ghost" size="icon" onClick={() => handleAction('Archive', post.title)}><Archive className="h-4 w-4" /></Button>

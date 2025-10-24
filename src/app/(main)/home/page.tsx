@@ -1,5 +1,4 @@
 import { getPosts, getUsers } from '@/lib/api';
-import ViewToggle from './ViewToggle';
 import BlogList from './BlogList';
 
 export default async function HomePage() {
