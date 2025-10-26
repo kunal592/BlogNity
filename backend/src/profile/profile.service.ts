@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { v2 as cloudinary } from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
+import { Multer } from 'multer';
 
 @Injectable()
 export class ProfileService {
@@ -40,8 +41,8 @@ export class ProfileService {
     };
   }
 
-  async updateProfile(userId: string, bio: string, avatar: Express.Multer.File) {
-    let avatarUrl: string;
+  async updateProfile(userId: string, bio: string, avatar: Multer.File) {
+    let avatarUrl: string | undefined = undefined;
 
     if (avatar) {
       const uploadResult = await new Promise((resolve, reject) => {
@@ -56,14 +57,14 @@ export class ProfileService {
           },
         );
         uploadStream.end(avatar.buffer);
-      });
+      }) as { secure_url: string };
       avatarUrl = uploadResult.secure_url;
     }
 
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: {
-        bio,
+        ...(bio && { bio }),
         ...(avatarUrl && { profileImage: avatarUrl }),
       },
     });

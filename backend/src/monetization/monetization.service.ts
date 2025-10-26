@@ -16,7 +16,7 @@ export class MonetizationService {
   async createSubscription(planId: string, customerId: string) {
     const subscription = await this.razorpay.subscriptions.create({
       plan_id: planId,
-      customer_id: customerId,
+      customer_notify: 1,
       total_count: 12, // yearly subscription
     });
 

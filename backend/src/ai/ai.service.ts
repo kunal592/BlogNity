@@ -7,6 +7,9 @@ export class AiService {
   private readonly genAI: GoogleGenerativeAI;
 
   constructor() {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not defined');
+    }
     this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
 
