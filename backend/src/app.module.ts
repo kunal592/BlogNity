@@ -11,6 +11,7 @@ import { NotificationModule } from './notification/notification.module';
 import { AdminModule } from './admin/admin.module';
 import { AiModule } from './ai/ai.module';
 import { InteractionModule } from './interaction.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { InteractionModule } from './interaction.module';
     AdminModule,
     AiModule,
     InteractionModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
