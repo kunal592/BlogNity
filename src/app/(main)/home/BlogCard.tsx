@@ -17,7 +17,7 @@ import {
   BookOpen,
   Gem,
 } from 'lucide-react';
-import { toggleBookmark, toggleLike, getPostSummary } from '@/lib/api';
+import { useToggleBookmark, useToggleLike, useFollowUser, useUnfollowUser, getPostSummary } from '@/lib/api';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -32,24 +32,44 @@ export default function BlogCard({ post, author }: BlogCardProps) {
   const [isLiked, setIsLiked] = useState(user ? post.likedBy.includes(user.id) : false);
   const [likes, setLikes] = useState(post.likes);
   const [isBookmarked, setIsBookmarked] = useState(user ? user.bookmarkedPosts.includes(post.id) : false);
+  const [isFollowing, setIsFollowing] = useState(user && author ? user.following.includes(author.id) : false);
+
+  const { trigger: toggleLike } = useToggleLike();
+  const { trigger: toggleBookmark } = useToggleBookmark();
+  const { trigger: followUser } = useFollowUser();
+  const { trigger: unfollowUser } = useUnfollowUser();
 
   const handleLike = async () => {
-    if (!user || !token) return toast({ title: 'Please log in to like posts.', variant: 'destructive' });
+    if (!user) return toast({ title: 'Please log in to like posts.', variant: 'destructive' });
     
     setIsLiked(!isLiked);
     setLikes(prev => isLiked ? prev - 1 : prev + 1);
     
-    await toggleLike(post.id, user.id, token);
+    await toggleLike({ postId: post.id, userId: user.id });
     toast({ title: isLiked ? 'Post unliked' : 'Post liked!' });
   };
 
   const handleBookmark = async () => {
-    if (!user || !token) return toast({ title: 'Please log in to bookmark posts.', variant: 'destructive' });
+    if (!user) return toast({ title: 'Please log in to bookmark posts.', variant: 'destructive' });
 
     setIsBookmarked(!isBookmarked);
-    await toggleBookmark(post.id, user.id, token);
+    await toggleBookmark({ postId: post.id, userId: user.id });
     refetchUser(); // update user context
     toast({ title: isBookmarked ? 'Bookmark removed' : 'Post bookmarked!' });
+  };
+
+  const handleFollow = async () => {
+    if (!user || !author) return toast({ title: 'Please log in to follow users.', variant: 'destructive' });
+
+    setIsFollowing(!isFollowing);
+    if (isFollowing) {
+      await unfollowUser({ followerId: user.id, followingId: author.id });
+      toast({ title: `Unfollowed ${author.name}` });
+    } else {
+      await followUser({ followerId: user.id, followingId: author.id });
+      toast({ title: `Followed ${author.name}` });
+    }
+    refetchUser();
   };
   
   const handleSummarize = async () => {
@@ -112,7 +132,9 @@ export default function BlogCard({ post, author }: BlogCardProps) {
               </Avatar>
               <span className="text-sm font-medium">{author.name}</span>
             </div>
-            <Button size="sm" variant="outline">Follow</Button>
+            <Button size="sm" variant="outline" onClick={handleFollow}>
+              {isFollowing ? 'Unfollow' : 'Follow'}
+            </Button>
           </div>
         )}
         <div className="flex items-center justify-between w-full text-muted-foreground">

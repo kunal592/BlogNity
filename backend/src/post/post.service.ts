@@ -22,6 +22,26 @@ export class PostService {
     return this.prisma.post.findMany();
   }
 
+  async getFeed(userId: string) {
+    const followedUsers = await this.prisma.follow.findMany({
+        where: { followerId: userId },
+        select: { followingId: true },
+    });
+
+    const followedUserIds = followedUsers.map((follow) => follow.followingId);
+
+    return this.prisma.post.findMany({
+        where: {
+            authorId: {
+                in: followedUserIds,
+            },
+        },
+        include: {
+            author: true,
+        },
+    });
+  }
+
   findOne(id: string) {
     return this.prisma.post.findUnique({ where: { id } });
   }

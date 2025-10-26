@@ -58,6 +58,14 @@ export const getPost = async (slugOrId: string): Promise<Post | null> => {
   }
 };
 
+export const getUsers = async (): Promise<User[]> => {
+  return fetcher(`${API_URL}/users`);
+};
+
+export const getFeed = async (userId: string): Promise<Post[]> => {
+  return fetcher(`${API_URL}/post/feed?userId=${userId}`);
+};
+
 // --- SWR HOOKS FOR CLIENT-SIDE DATA FETCHING ---
 
 function useAuthenticatedSWR<T>(key: string | null, options?: SWRConfiguration) {
@@ -191,14 +199,38 @@ export const getPostSummary = async (postId: string): Promise<{ summary: string 
   return authenticatedRequest(`${API_URL}/post/${postId}/summarize`, 'POST', token);
 };
 
-export const toggleLike = async (postId: string, userId: string): Promise<Post> => {
+export function useToggleLike() {
     const { token } = useAuth();
-    if (!token) throw new Error("User is not authenticated.");
-    return authenticatedRequest(`${API__URL}/post/${postId}/like`, 'POST', token, { userId });
-};
+    const trigger = async (postId: string, userId: string): Promise<Post> => {
+        if (!token) throw new Error("User is not authenticated.");
+        return authenticatedRequest(`${API_URL}/likes`, 'POST', token, { postId, userId });
+    };
+    return { trigger };
+}
 
-export const toggleBookmark = async (postId: string, userId: string): Promise<User> => {
+export function useToggleBookmark() {
     const { token } = useAuth();
-    if (!token) throw new Error("User is not authenticated.");
-    return authenticatedRequest(`${API_URL}/users/${userId}/bookmark`, 'POST', token, { postId });
-};
+    const trigger = async (postId: string, userId: string): Promise<User> => {
+        if (!token) throw new Error("User is not authenticated.");
+        return authenticatedRequest(`${API_URL}/bookmarks`, 'POST', token, { postId, userId });
+    };
+    return { trigger };
+}
+
+export function useFollowUser() {
+    const { token } = useAuth();
+    const trigger = async (followerId: string, followingId: string): Promise<User> => {
+        if (!token) throw new Error("User is not authenticated.");
+        return authenticatedRequest(`${API_URL}/interaction/follow`, 'POST', token, { followerId, followingId });
+    };
+    return { trigger };
+}
+
+export function useUnfollowUser() {
+    const { token } = useAuth();
+    const trigger = async (followerId: string, followingId: string): Promise<User> => {
+        if (!token) throw new Error("User is not authenticated.");
+        return authenticatedRequest(`${API_URL}/interaction/unfollow`, 'POST', token, { followerId, followingId });
+    };
+    return { trigger };
+}

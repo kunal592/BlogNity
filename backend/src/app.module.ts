@@ -10,6 +10,7 @@ import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { NotificationModule } from './notification/notification.module';
 import { AdminModule } from './admin/admin.module';
 import { AiModule } from './ai/ai.module';
+import { InteractionModule } from './interaction.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AiModule } from './ai/ai.module';
     NotificationModule,
     AdminModule,
     AiModule,
+    InteractionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
