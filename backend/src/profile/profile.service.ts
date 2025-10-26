@@ -47,7 +47,7 @@ export class ProfileService {
 
     if (avatar) {
       const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
-        const uploadStream = cloudinary.uploader..upload_stream(
+        const uploadStream = cloudinary.uploader.upload_stream(
           { resource_type: 'auto' },
           (error, result) => {
             if (error) {
