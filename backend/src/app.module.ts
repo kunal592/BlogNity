@@ -9,6 +9,7 @@ import { LikesModule } from './likes/likes.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { NotificationModule } from './notification/notification.module';
 import { AdminModule } from './admin/admin.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { AdminModule } from './admin/admin.module';
     LikesModule,
     BookmarksModule,
     NotificationModule,
-    AdminModule
+    AdminModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
