@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { v2 as cloudinary } from 'cloudinary';
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
-import { Multer } from 'multer';
+import { Express } from 'express';
 
 @Injectable()
 export class ProfileService {
@@ -41,23 +41,25 @@ export class ProfileService {
     };
   }
 
-  async updateProfile(userId: string, bio: string, avatar: Multer.File) {
+  async updateProfile(userId: string, bio: string | undefined, avatar: Express.Multer.File) {
     let avatarUrl: string | undefined = undefined;
 
     if (avatar) {
-      const uploadResult = await new Promise((resolve, reject) => {
+      const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           { resource_type: 'auto' },
           (error, result) => {
             if (error) {
               reject(error);
-            } else {
+            } else if (result) {
               resolve(result);
+            } else {
+              reject(new Error('Cloudinary upload failed'));
             }
           },
         );
         uploadStream.end(avatar.buffer);
-      }) as { secure_url: string };
+      });
       avatarUrl = uploadResult.secure_url;
     }
 

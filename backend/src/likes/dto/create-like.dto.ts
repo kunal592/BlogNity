@@ -1,9 +1,14 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateLikeDto {
   @IsString()
   userId: string;
 
   @IsString()
-  postId: string;
+  @IsOptional()
+  postId?: string;
+
+  @IsString()
+  @IsOptional()
+  commentId?: string;
 }
