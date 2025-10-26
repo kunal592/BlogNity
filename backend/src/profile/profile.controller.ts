@@ -12,7 +12,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
 import { AuthGuard } from '@nestjs/passport';
-import { Express } from 'express';
+import type { Express } from 'express';
 
 @Controller('profile')
 export class ProfileController {
