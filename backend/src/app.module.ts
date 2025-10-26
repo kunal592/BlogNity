@@ -12,6 +12,7 @@ import { AdminModule } from './admin/admin.module';
 import { AiModule } from './ai/ai.module';
 import { InteractionModule } from './interaction.module';
 import { ProfileModule } from './profile/profile.module';
+import { MonetizationModule } from './monetization/monetization.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ProfileModule } from './profile/profile.module';
     AiModule,
     InteractionModule,
     ProfileModule,
+    MonetizationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
