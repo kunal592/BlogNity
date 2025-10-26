@@ -3,7 +3,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
 import { Express } from 'express';
-import { File } from 'multer';
 
 @Injectable()
 export class ProfileService {

@@ -12,7 +12,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
 import { AuthGuard } from '@nestjs/passport';
-import { Multer } from 'multer';
+import { Express } from 'express';
 
 @Controller('profile')
 export class ProfileController {
@@ -29,7 +29,7 @@ export class ProfileController {
   async updateProfile(
     @Request() req,
     @Body() body: { bio?: string },
-    @UploadedFile() avatar: Multer.File,
+    @UploadedFile() avatar: Express.Multer.File,
   ) {
     const { id: userId } = req.user;
     return this.profileService.updateProfile(userId, body.bio, avatar);
