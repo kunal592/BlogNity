@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateLikeDto } from './dto/create-like.dto';
 import { UpdateLikeDto } from './dto/update-like.dto';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { LikeTarget } from '@prisma/client';
 
 @Injectable()

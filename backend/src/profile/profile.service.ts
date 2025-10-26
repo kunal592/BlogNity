@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
 import { Express } from 'express';
+import { File } from 'multer';
 
 @Injectable()
 export class ProfileService {
@@ -46,7 +47,7 @@ export class ProfileService {
 
     if (avatar) {
       const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
+        const uploadStream = cloudinary.uploader..upload_stream(
           { resource_type: 'auto' },
           (error, result) => {
             if (error) {
