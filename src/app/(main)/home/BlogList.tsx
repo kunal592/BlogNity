@@ -9,7 +9,7 @@ import BlogCardList from './BlogCardList';
 import type { Post } from '@/lib/types';
 
 interface BlogListProps {
-  initialData: { posts: Post[], total: number };
+  initialData?: { posts: Post[], total: number }; // Make initialData optional
   listTitle?: string;
 }
 
@@ -17,9 +17,12 @@ export default function BlogList({ initialData, listTitle = "Public Feed" }: Blo
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const loaderRef = useRef<HTMLDivElement>(null);
 
+  // Use initialData as fallback to avoid re-fetching the first page
   const { posts, error, isLoadingMore, isReachingEnd, size, setSize } = usePostsInfinite(10);
 
-  const allPosts = initialData.posts.concat(posts);
+  // Safely combine initial posts with client-side fetched posts
+  const initialPosts = initialData?.posts || [];
+  const allPosts = posts.length > 0 ? posts : initialPosts;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -31,16 +34,27 @@ export default function BlogList({ initialData, listTitle = "Public Feed" }: Blo
       { threshold: 1.0 }
     );
 
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
+    const loader = loaderRef.current;
+    if (loader) {
+      observer.observe(loader);
     }
 
     return () => {
-      if (loaderRef.current) {
-        observer.unobserve(loaderRef.current);
+      if (loader) {
+        observer.unobserve(loader);
       }
     };
   }, [isLoadingMore, isReachingEnd, setSize, size]);
+
+  if (!allPosts.length && !isLoadingMore) {
+    return (
+      <div className="text-center text-muted-foreground">
+        <h1 className="text-2xl font-bold mb-4">No Posts Found</h1>
+        <p>It seems there are no posts to display at the moment.</p>
+         <p>This might be because the backend server is not running.</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -81,7 +95,7 @@ export default function BlogList({ initialData, listTitle = "Public Feed" }: Blo
       
       <div ref={loaderRef} className="flex justify-center items-center py-8">
           {isLoadingMore && <Loader2 className="h-8 w-8 animate-spin text-primary" />} 
-          {isReachingEnd && <p className="text-muted-foreground">No more posts to load.</p>}
+          {isReachingEnd && allPosts.length > 0 && <p className="text-muted-foreground">No more posts to load.</p>}
       </div>
 
       {error && <p className="text-destructive text-center">Failed to load more posts.</p>}
