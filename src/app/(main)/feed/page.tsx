@@ -1,4 +1,4 @@
-import { getFeed } from '@/lib/api';
+import { getFeed } from '@/lib/data';
 import FeedPageClient from './FeedPageClient';
 
 export default async function FeedPage() {

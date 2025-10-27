@@ -1,6 +1,6 @@
 import type { Post, User } from './types';
 
-const API_URL = 'http://localhost:3001';
+const API_URL = 'http://localhost:3000';
 
 // This fetcher is for server-side use
 async function fetcher(url: string) {
