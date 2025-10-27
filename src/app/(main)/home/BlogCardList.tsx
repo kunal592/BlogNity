@@ -17,7 +17,7 @@ import {
   BookOpen,
   Gem,
 } from 'lucide-react';
-import { toggleBookmark, toggleLike } from '@/lib/api';
+import { useToggleBookmark, useToggleLike } from '@/lib/api';
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -30,6 +30,9 @@ interface BlogCardListProps {
 export default function BlogCardList({ post, author }: BlogCardListProps) {
   const { user, refetchUser } = useAuth();
   const { toast } = useToast();
+  const { trigger: toggleLike } = useToggleLike();
+  const { trigger: toggleBookmark } = useToggleBookmark();
+  
   const [isLiked, setIsLiked] = useState(user ? post.likedBy.includes(user.id) : false);
   const [likes, setLikes] = useState(post.likes);
   const [isBookmarked, setIsBookmarked] = useState(user ? user.bookmarkedPosts.includes(post.id) : false);
@@ -40,17 +43,33 @@ export default function BlogCardList({ post, author }: BlogCardListProps) {
     setIsLiked(!isLiked);
     setLikes(prev => isLiked ? prev - 1 : prev + 1);
     
-    await toggleLike(post.id, user.id);
-    toast({ title: isLiked ? 'Post unliked' : 'Post liked!' });
+    try {
+      await toggleLike(post.id, user.id);
+      toast({ title: isLiked ? 'Post unliked' : 'Post liked!' });
+    } catch (error) {
+      console.error('Failed to toggle like', error);
+      // Revert UI changes on failure
+      setIsLiked(!isLiked);
+      setLikes(prev => isLiked ? prev + 1 : prev - 1);
+      toast({ title: 'Something went wrong.', variant: 'destructive' });
+    }
   };
 
   const handleBookmark = async () => {
     if (!user) return toast({ title: 'Please log in to bookmark posts.', variant: 'destructive' });
 
     setIsBookmarked(!isBookmarked);
-    await toggleBookmark(post.id, user.id);
-    refetchUser();
-    toast({ title: isBookmarked ? 'Bookmark removed' : 'Post bookmarked!' });
+
+    try {
+      await toggleBookmark(post.id, user.id);
+      refetchUser(); // Refetch user to update their bookmark list
+      toast({ title: isBookmarked ? 'Bookmark removed' : 'Post bookmarked!' });
+    } catch (error) {
+      console.error('Failed to toggle bookmark', error);
+      // Revert UI changes on failure
+      setIsBookmarked(!isBookmarked);
+      toast({ title: 'Something went wrong.', variant: 'destructive' });
+    }
   };
   
   const handleSummarize = () => {
