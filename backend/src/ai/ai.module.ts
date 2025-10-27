@@ -4,6 +4,7 @@ import { AiController } from './ai.controller';
 
 @Module({
   controllers: [AiController],
-  providers: [AiService]
+  providers: [AiService],
+  exports: [AiService],
 })
 export class AiModule {}
