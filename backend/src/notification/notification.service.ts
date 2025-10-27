@@ -9,10 +9,10 @@ export class NotificationService {
     return this.prisma.notification.findMany();
   }
 
-  markRead(id: string) {
+  markRead(id: string, isRead: boolean) {
     return this.prisma.notification.update({
       where: { id },
-      data: { isRead: true },
+      data: { isRead },
     });
   }
 }

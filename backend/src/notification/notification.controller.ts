@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Put, Param, Body } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 
 @Controller('notification')
@@ -10,8 +10,8 @@ export class NotificationController {
     return this.notificationService.list();
   }
 
-  @Patch(':id/mark-read')
-  markRead(@Param('id') id: string) {
-    return this.notificationService.markRead(id);
+  @Put(':id')
+  markRead(@Param('id') id: string, @Body('isRead') isRead: boolean) {
+    return this.notificationService.markRead(id, isRead);
   }
 }

@@ -22,7 +22,14 @@ export default function AboutPage() {
           </p>
         </div>
         <div className="relative h-80 rounded-lg overflow-hidden">
-            <Image src="https://picsum.photos/seed/about1/800/600" alt="Team working" layout="fill" objectFit="cover" data-ai-hint="team collaboration" />
+            <Image 
+              src="https://picsum.photos/seed/about1/800/600" 
+              alt="Team working" 
+              fill 
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover" 
+              data-ai-hint="team collaboration" 
+            />
         </div>
       </section>
 

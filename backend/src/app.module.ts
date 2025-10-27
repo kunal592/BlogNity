@@ -13,6 +13,7 @@ import { AiModule } from './ai/ai.module';
 import { InteractionModule } from './interaction.module';
 import { ProfileModule } from './profile/profile.module';
 import { MonetizationModule } from './monetization/monetization.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { MonetizationModule } from './monetization/monetization.module';
     InteractionModule,
     ProfileModule,
     MonetizationModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

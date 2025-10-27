@@ -12,7 +12,7 @@ async function PostEditor({ postId }: { postId: string | null }) {
   return <Editor post={post} />;
 }
 
-export default function PostBlogPage({ searchParams }: { searchParams: { id?: string } }) {
+export default async function PostBlogPage({ searchParams }: { searchParams: { id?: string } }) {
   const postId = searchParams.id || null;
 
   return (
