@@ -43,6 +43,25 @@ async function authenticatedRequest(url: string, method: 'POST' | 'PUT' | 'DELET
   return res.json();
 }
 
+export const postRequest = async (url: string, data: any) => {
+  const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const error: any = new Error('An error occurred while making the request.');
+      try {
+        error.info = await res.json();
+      } catch (e) {
+        error.info = { message: res.statusText };
+      }
+      error.status = res.status;
+      throw error;
+    }
+    return res.json();
+};
+
 // --- SERVER-SIDE DATA FETCHING ---
 
 export const getPosts = async (page = 1, limit = 10): Promise<{ posts: Post[], total: number }> => {
