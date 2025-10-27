@@ -89,17 +89,19 @@ export default function AppSidebar() {
                </Link>
              </SidebarMenuItem>
           ))}
-          <SidebarMenuItem>
-            <Link href={adminNavItem.href}>
-              <SidebarMenuButton
-                isActive={isActive(adminNavItem.href)}
-                tooltip={{ children: adminNavItem.title }}
-              >
-                <adminNavItem.icon />
-                <span>{adminNavItem.title}</span>
-              </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
+          {user && user.role === 'ADMIN' && (
+            <SidebarMenuItem>
+              <Link href={adminNavItem.href}>
+                <SidebarMenuButton
+                  isActive={isActive(adminNavItem.href)}
+                  tooltip={{ children: adminNavItem.title }}
+                >
+                  <adminNavItem.icon />
+                  <span>{adminNavItem.title}</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>

@@ -5,14 +5,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Post } from '@/lib/types';
-import { Archive, Star, Trash2, Gem } from 'lucide-react';
+import { Archive, Star, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { updatePost } from '@/lib/api';
+import { useUpdatePost } from '@/lib/api';
 import { Switch } from '@/components/ui/switch';
 
 export default function AdminPostTable({ posts, onUpdate }: { posts: Post[], onUpdate: () => void }) {
     const { toast } = useToast();
+    const { trigger: updatePost } = useUpdatePost();
 
     const handleAction = (action: string, postTitle: string) => {
         toast({ title: `${action} post: ${postTitle}`, description: 'This is a mock action.' });
@@ -20,11 +21,11 @@ export default function AdminPostTable({ posts, onUpdate }: { posts: Post[], onU
 
     const handleToggleExclusive = async (post: Post) => {
         const newVisibility = post.visibility === 'premium' ? 'public' : 'premium';
-        const { success } = await updatePost(post.id, { visibility: newVisibility });
-        if (success) {
+        try {
+            await updatePost(post.id, { visibility: newVisibility });
             toast({ title: `Post is now ${newVisibility}` });
             onUpdate();
-        } else {
+        } catch (error) {
             toast({ title: 'Failed to update post.', variant: 'destructive' });
         }
     };
