@@ -14,6 +14,6 @@ export class UsersService {
   }
 
   findBookmarks(id: string) {
-    return this.prisma.user.findUnique({ where: { id }}).bookmarks({ include: { posts: true }});
+    return this.prisma.user.findUnique({ where: { id }}).bookmarks({ include: { post: true }});
   }
 }
