@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import type { User } from '@/lib/types';
 import { postRequest } from '@/lib/api';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 interface AuthContextType {
   user: User | null;
@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const storedToken = localStorage.getItem('jwt');
     if (storedToken) {
-      const decoded: any = jwt_decode(storedToken);
+      const decoded: any = jwtDecode(storedToken);
       setUser(decoded.user);
       setToken(storedToken);
     }
@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (credentials: any) => {
     try {
       const { accessToken } = await postRequest('http://localhost:3001/auth/login', credentials);
-      const decoded: any = jwt_decode(accessToken);
+      const decoded: any = jwtDecode(accessToken);
       setUser(decoded.user);
       setToken(accessToken);
       localStorage.setItem('jwt', accessToken);
@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // For now, we'll just refetch from the decoded token
     const storedToken = localStorage.getItem('jwt');
     if (storedToken) {
-      const decoded: any = jwt_decode(storedToken);
+      const decoded: any = jwtDecode(storedToken);
       setUser(decoded.user);
     }
   };
