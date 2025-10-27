@@ -2,14 +2,14 @@
 
 import useSWR, { SWRConfiguration } from 'swr';
 import useSWRInfinite from 'swr/infinite';
-import type { User, Post, Notification, ContactMessage, Bookmark, Tag } from './types';
+import type { User, Post, Notification, ContactMessage } from './types';
 import { useAuth } from '@/context/AuthContext';
 
 const API_URL = 'http://localhost:3001';
 
 // --- GENERIC FETCHER & REQUEST FUNCTIONS ---
 
-async function fetcher(url: string, token?: string) {
+async function fetcher(url: string, token?: string | null) {
   const headers: HeadersInit = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -17,25 +17,6 @@ async function fetcher(url: string, token?: string) {
   const res = await fetch(url, { headers });
   if (!res.ok) {
     const error: any = new Error('An error occurred while fetching the data.');
-    error.info = await res.json();
-    error.status = res.status;
-    throw error;
-  }
-  return res.json();
-}
-
-async function authenticatedRequest(url: string, method: 'POST' | 'PUT' | 'DELETE', token: string, data?: any) {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
-  };
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: data ? JSON.stringify(data) : undefined,
-  });
-  if (!res.ok) {
-    const error: any = new Error(`An error occurred during the ${method} request.`);
     error.info = await res.json();
     error.status = res.status;
     throw error;
@@ -62,23 +43,44 @@ export const postRequest = async (url: string, data: any) => {
     return res.json();
 };
 
+async function authenticatedRequest(url: string, method: 'POST' | 'PUT' | 'DELETE', token: string, data?: any) {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+  const res = await fetch(url, {
+    method,
+    headers,
+    body: data ? JSON.stringify(data) : undefined,
+  });
+  if (!res.ok) {
+    const error: any = new Error(`An error occurred during the ${method} request.`);
+    error.info = await res.json();
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
 // --- SWR HOOKS FOR CLIENT-SIDE DATA FETCHING ---
 
 function useAuthenticatedSWR<T>(key: string | null, options?: SWRConfiguration) {
   const { token } = useAuth();
-  return useSWR<T>(key ? [key, token] : null, ([url, token]) => fetcher(url, token), options);
+  return useSWR<T>(key ? [key, token] : null, fetcher, options);
 }
 
-function useAuthenticatedSWRInfinite<T extends {id: string}>(getKey: (pageIndex: number, previousPageData: T[] | null) => string | null) {
+function useAuthenticatedSWRInfinite<PageType>(getKey: (pageIndex: number, previousPageData: PageType | null) => string | null) {
   const { token } = useAuth();
-  return useSWRInfinite<T[]>(
+  const { data, error, size, setSize, mutate, isLoading } = useSWRInfinite<PageType>(
       (pageIndex, previousPageData) => {
         const key = getKey(pageIndex, previousPageData);
         return key ? [key, token] : null;
       },
-      ([url, token]) => fetcher(url, token)
+      fetcher
   );
+    return { data, error, size, setSize, mutate, isLoading };
 }
+
 
 export const useUsers = (options?: SWRConfiguration) => {
   const { data, error, isLoading, mutate } = useAuthenticatedSWR<User[]>(`${API_URL}/users`, options);
@@ -91,16 +93,24 @@ export const useUser = (id?: string, options?: SWRConfiguration) => {
 };
 
 export const usePostsInfinite = (limit = 5) => {
-    const { data, error, size, setSize, mutate, isLoading } = useAuthenticatedSWRInfinite<Post>(
+    const { data, error, size, setSize, mutate, isLoading } = useAuthenticatedSWRInfinite<{ posts: Post[], total: number }>(
         (pageIndex, previousPageData) => {
-            if (previousPageData && !previousPageData.length) return null; // Reached the end
+            // Reached the end
+            if (previousPageData && !previousPageData.posts.length) return null; 
+            
+            // First page, no previous data
+            if (pageIndex === 0 || !previousPageData) return `${API_URL}/post?page=1&limit=${limit}`;
+
+            // All items loaded
+            if ((pageIndex + 1) * limit >= previousPageData.total) return null;
+
             return `${API_URL}/post?page=${pageIndex + 1}&limit=${limit}`;
         }
     );
-
-    const posts: Post[] = data ? [].concat(...data.map(page => page.posts)) : [];
+    
+    const posts: Post[] = data ? data.map(page => page.posts).flat() : [];
     const isLoadingMore = isLoading || (size > 0 && data && typeof data[size - 1] === 'undefined');
-    const isReachingEnd = data && (!data[data.length-1]?.posts.length || data[data.length -1].posts.length < limit);
+    const isReachingEnd = data && data[data.length - 1] && data[data.length - 1].posts.length < limit;
 
     return { posts, error, isLoading: isLoading, isLoadingMore, isReachingEnd, size, setSize, mutate };
 };
@@ -116,7 +126,7 @@ export const useSearchPosts = (query?: string, options?: SWRConfiguration) => {
 };
 
 export const useBookmarkedPosts = (userId?: string, options?: SWRConfiguration) => {
-    const { data, error, isLoading, mutate } = useAuthenticatedSWR<Bookmark[]>(userId ? `${API_URL}/users/${userId}/bookmarks` : null, options);
+    const { data, error, isLoading, mutate } = useAuthenticatedSWR<Post[]>(userId ? `${API_URL}/users/${userId}/bookmarks` : null, options);
     return { data, error, isLoading, mutate };
 }
 
@@ -180,13 +190,14 @@ export function useUpdateNotification() {
 }
 
 export const sendContactMessage = async (formData: { name: string; email: string; message: string }): Promise<{ success: boolean }> => {
-  const res = await fetch(`${API_URL}/contact`, {
+    return fetch(`${API_URL}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
+    }).then(res => {
+        if (!res.ok) throw new Error('Failed to send message');
+        return res.json();
     });
-    if (!res.ok) throw new Error('Failed to send message');
-    return res.json();
 };
 
 export const getPostSummary = async (postId: string): Promise<{ summary: string }> => {

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { ContactMessage } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { updateContactMessage } from '@/lib/api';
+import { useUpdateContactMessage } from '@/lib/api';
 import { CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -17,13 +17,14 @@ interface ResolveQueriesTableProps {
 
 export default function ResolveQueriesTable({ queries, onUpdate }: ResolveQueriesTableProps) {
     const { toast } = useToast();
+    const { trigger: updateMessage } = useUpdateContactMessage();
 
     const handleResolve = async (id: string) => {
-        const { success } = await updateContactMessage(id, { status: 'resolved' });
-        if (success) {
+        try {
+            await updateMessage(id, { status: 'resolved' });
             toast({ title: 'Query marked as resolved.' });
             onUpdate();
-        } else {
+        } catch (error) {
             toast({ title: 'Failed to update query.', variant: 'destructive' });
         }
     };

@@ -35,7 +35,7 @@ export default function Editor({ post }: EditorProps) {
     if (post) {
       setTitle(post.title);
       setContent(post.content);
-      setTags(post.tags.map(t => t.name).join(', '));
+      setTags(post.tags.join(', '));
     }
   }, [post]);
 
@@ -55,7 +55,7 @@ export default function Editor({ post }: EditorProps) {
         content,
         authorId: user.id,
         status,
-        tags: tags.split(',').map(t => ({ name: t.trim() })).filter(t => t.name),
+        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
         excerpt: content.substring(0, 150) + '...',
       };
 

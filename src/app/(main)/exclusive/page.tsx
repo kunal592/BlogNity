@@ -6,7 +6,7 @@ export default async function ExclusivePage() {
   const { posts: allPosts } = await getPosts(1, 1000); // Fetch a large number of posts
   const allUsers = await getUsers();
 
-  const exclusivePosts = allPosts.filter(post => post.visibility === 'premium');
+  const exclusivePosts = allPosts.filter(post => post.isExclusive);
 
   const exclusivePostsWithAuthors: (Post & { author?: User })[] = exclusivePosts.map(post => {
     const author = allUsers.find(u => u.id === post.authorId);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { deletePost, usePostsByAuthor } from '@/lib/api';
+import { useDeletePost, usePostsByAuthor } from '@/lib/api';
 import type { Post } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,15 +20,16 @@ export default function DashboardPage() {
   const router = useRouter();
   
   const { data: posts, isLoading, mutate } = usePostsByAuthor(user?.id);
+  const { trigger: deletePostTrigger } = useDeletePost();
 
   const handleDelete = async (postId: string) => {
     if (!confirm('Are you sure you want to delete this post?')) return;
     
-    const { success } = await deletePost(postId);
-    if (success) {
-      mutate();
+    try {
+      await deletePostTrigger(postId);
+      mutate(); // Re-fetch the posts list
       toast({ title: 'Post deleted successfully.' });
-    } else {
+    } catch (error) {
       toast({ title: 'Failed to delete post.', variant: 'destructive' });
     }
   };
@@ -51,8 +52,8 @@ export default function DashboardPage() {
   const publishedPosts = posts.filter(p => p.status === 'published');
   const draftPosts = posts.filter(p => p.status === 'draft');
   
-  const totalLikes = posts.reduce((sum, p) => sum + p.likesCount, 0);
-  const totalComments = posts.reduce((sum, p) => sum + p.commentsCount, 0);
+  const totalLikes = posts.reduce((sum, p) => sum + p.likes, 0);
+  const totalComments = posts.reduce((sum, p) => sum + p.comments.length, 0);
 
   return (
     <div className="container mx-auto space-y-8">
@@ -112,7 +113,7 @@ function PostTable({ posts, onDelete, router }: { posts: Post[], onDelete: (id: 
             <TableRow key={post.id}>
               <TableCell className="font-medium">{post.title}</TableCell>
               <TableCell><Badge variant={post.status === 'published' ? 'default' : 'secondary'}>{post.status}</Badge></TableCell>
-              <TableCell>{post.createdAt ? format(new Date(post.createdAt), 'MMM d, yyyy') : '-'}</TableCell>
+              <TableCell>{post.publishedAt ? format(new Date(post.publishedAt), 'MMM d, yyyy') : '-'}</TableCell>
               <TableCell className="text-right">
                 <Button variant="ghost" size="icon" onClick={() => router.push(`/postblog?id=${post.id}`)}>
                   <Edit className="h-4 w-4" />
