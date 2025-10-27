@@ -6,41 +6,38 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/context/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
-import { createPost, getPost } from '@/lib/api';
+import { useCreatePost } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { aiSEOBlog } from '@/ai/flows/ai-seo-blog';
 import { Loader2, Wand2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import type { Post } from '@/lib/types';
 
-export default function Editor() {
+interface EditorProps {
+  post?: Post | null;
+}
+
+export default function Editor({ post }: EditorProps) {
   const { theme } = useTheme();
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const postId = searchParams.get('id');
+  const { trigger: savePost } = useCreatePost();
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('**Hello world!!!**');
   const [tags, setTags] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
-  const [isLoading, setIsLoading] = useState(!!postId);
 
   useEffect(() => {
-    if (postId) {
-      getPost(postId).then(post => {
-        if (post) {
-            setTitle(post.title);
-            setContent(post.content);
-            setTags(post.tags.map(t => t.name).join(', '));
-        }
-        setIsLoading(false);
-      });
+    if (post) {
+      setTitle(post.title);
+      setContent(post.content);
+      setTags(post.tags.map(t => t.name).join(', '));
     }
-  }, [postId]);
+  }, [post]);
 
   const handleSave = async (status: 'draft' | 'published') => {
     if (!user) {
@@ -58,20 +55,20 @@ export default function Editor() {
         content,
         authorId: user.id,
         status,
-        tags: tags.split(',').map(t => ({ name: t.trim() })).filter(Boolean),
+        tags: tags.split(',').map(t => ({ name: t.trim() })).filter(t => t.name),
         excerpt: content.substring(0, 150) + '...',
       };
 
-      if (!postId) {
+      if (!post?.id) {
           postData.thumbnailUrl = `https://picsum.photos/seed/${Date.now()}/600/400`;
       }
       
-      await createPost(postData, postId || undefined);
+      await savePost(postData, post?.id);
 
-      toast({ title: `Post ${status === 'draft' ? 'saved as draft' : 'published'}!` });
+      toast({ title: `Post ${post?.id ? 'updated' : 'saved'} successfully!` });
       router.push('/dashboard');
     } catch (error) {
-      toast({ title: 'Failed to save post.', variant: 'destructive' });
+      toast({ title: `Failed to ${post?.id ? 'update' : 'save'} post.`, variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -91,10 +88,6 @@ export default function Editor() {
       setIsOptimizing(false);
     }
   };
-
-  if (isLoading) {
-      return <Loader2 className="mx-auto my-12 h-8 w-8 animate-spin" />;
-  }
 
   return (
     <div className="space-y-6">
@@ -139,7 +132,7 @@ export default function Editor() {
           disabled={isSubmitting}
         >
           {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          {postId ? 'Update' : 'Publish'}
+          {post?.id ? 'Update' : 'Publish'}
         </Button>
       </div>
     </div>
