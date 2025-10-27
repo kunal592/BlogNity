@@ -62,29 +62,6 @@ export const postRequest = async (url: string, data: any) => {
     return res.json();
 };
 
-// --- SERVER-SIDE DATA FETCHING ---
-
-export const getPosts = async (page = 1, limit = 10): Promise<{ posts: Post[], total: number }> => {
-  return fetcher(`${API_URL}/post?page=${page}&limit=${limit}`);
-};
-
-export const getPost = async (slugOrId: string): Promise<Post | null> => {
-  try {
-    return await fetcher(`${API_URL}/post/${slugOrId}`);
-  } catch (error: any) {
-    if (error.status === 404) return null;
-    throw error;
-  }
-};
-
-export const getUsers = async (): Promise<User[]> => {
-  return fetcher(`${API_URL}/users`);
-};
-
-export const getFeed = async (userId: string): Promise<Post[]> => {
-  return fetcher(`${API_URL}/post/feed?userId=${userId}`);
-};
-
 // --- SWR HOOKS FOR CLIENT-SIDE DATA FETCHING ---
 
 function useAuthenticatedSWR<T>(key: string | null, options?: SWRConfiguration) {

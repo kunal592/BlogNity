@@ -1,4 +1,4 @@
-import { getPosts } from '@/lib/api';
+import { getPosts } from '@/lib/data';
 import BlogList from './BlogList';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
